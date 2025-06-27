@@ -2,7 +2,6 @@ const { app } = require("electron");
 const winston = require("winston");
 const path = require("path");
 const fs = require("fs");
-
 // 获取应用数据目录
 const getLogDir = () => {
   const userDataPath = app.getPath("userData");

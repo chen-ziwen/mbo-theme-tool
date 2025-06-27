@@ -1,9 +1,9 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
-const registerHandler = require("./main-handle");
-const { setupAutoUpdater, checkForUpdatesAndNotify } = require("./main-handle/updater");
+const { registerHandler, cleanup } = require("./main-handle");
+const UpdaterService = require("./main-handle/services/UpdaterService");
+const ConfigService = require("./main-handle/services/ConfigService");
 const { getIconPath, logger } = require("./utils");
-const { initializeConfigs } = require("./main-handle/config");
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 1024,
@@ -29,23 +29,20 @@ const createWindow = () => {
 };
 
 app.whenReady().then(async () => {
-  logger.info("应用启动完成", { version: app.getVersion(), platform: process.platform });
-
   // 初始化配置目录和文件
   try {
-    await initializeConfigs();
-    logger.info("配置初始化完成");
+    await ConfigService.initialize();
   } catch (error) {
     logger.error("配置初始化失败:", error);
   }
 
   createWindow();
 
-  // 设置自动更新事件监听
-  setupAutoUpdater();
+  // 初始化更新服务
+  UpdaterService.initialize();
 
   // 检查更新
-  checkForUpdatesAndNotify();
+  UpdaterService.checkForUpdatesAndNotify();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -54,13 +51,11 @@ app.whenReady().then(async () => {
   });
 });
 
-app.on("window-all-closed", () => {
-  logger.info("所有窗口已关闭");
+app.on("window-all-closed", async () => {
   if (process.platform !== "darwin") {
+    await cleanup();
     app.quit();
   }
 });
 
-app.on("before-quit", () => {
-  logger.info("应用即将退出");
-});
+app.on("before-quit", () => {});
