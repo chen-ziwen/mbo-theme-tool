@@ -1,0 +1,177 @@
+name: Build and Release
+
+permissions:
+  contents: write
+  packages: write
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Build Electron app (Windows)
+        if: matrix.os == 'windows-latest'
+        run: npm run electron:build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Electron app (macOS)
+        if: matrix.os == 'macos-latest'
+        run: npm run electron:build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Build Electron app (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run electron:build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows artifacts
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: |
+            dist_electron/*.exe
+            dist_electron/*.msi
+            dist_electron/latest.yml
+
+      - name: Upload macOS artifacts
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: |
+            dist_electron/*.dmg
+            dist_electron/*.zip
+            dist_electron/latest-mac.yml
+
+      - name: Upload Linux artifacts
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: |
+            dist_electron/*.AppImage
+            dist_electron/latest-linux.yml
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          # 提取当前版本的 changelog
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Extracting changelog for version: $VERSION"
+
+          # 调试：显示文件内容和版本信息
+          echo "=== CHANGELOG.md content ==="
+          cat CHANGELOG.md
+          echo "=== End of CHANGELOG.md ==="
+          echo "Looking for version: [$VERSION]"
+
+          # 使用更精确的awk脚本提取changelog内容
+          CHANGELOG=$(awk -v version="$VERSION" '
+            BEGIN { found=0; content="" }
+            /^## \[/ {
+              if (found && $0 !~ "\\[" version "\\]") {
+                exit
+              }
+              if ($0 ~ "\\[" version "\\]") {
+                found=1
+                next
+              }
+            }
+            found && !/^## \[/ {
+              if (content != "") content = content "\n"
+              content = content $0
+            }
+            END { print content }
+          ' CHANGELOG.md)
+
+          # 清理空行和空白字符
+          CHANGELOG=$(echo "$CHANGELOG" | sed '/^[[:space:]]*$/d' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+
+          # 如果没有找到内容，输出调试信息
+          if [ -z "$CHANGELOG" ]; then
+            echo "No changelog found for version $VERSION"
+            echo "Available versions in CHANGELOG.md:"
+            grep "^## \[" CHANGELOG.md || echo "No version headers found"
+            CHANGELOG="暂无更新日志"
+          else
+            echo "Found changelog content:"
+            echo "$CHANGELOG"
+          fi
+
+          # 使用多行输出格式
+          {
+            echo "CHANGELOG<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Mbo Theme Tool ${{ github.ref_name }}
+          body: |
+            ## 🚀 新版本发布 ${{ github.ref_name }}
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ### 📦 下载链接
+            - **Windows**: 下载 `.exe` 文件
+            - **macOS**: 下载 `.dmg` 文件  
+            - **Linux**: 下载 `.AppImage` 文件
+
+            ### 🔧 安装说明
+            1. 下载对应平台的安装包
+            2. 运行安装程序
+            3. 按照提示完成安装
+          files: |
+            artifacts/windows-build/*
+            artifacts/macos-build/*
+            artifacts/linux-build/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

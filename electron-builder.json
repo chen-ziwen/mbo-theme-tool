@@ -1,0 +1,64 @@
+{
+  "appId": "com.chiko.mbo-theme-tool",
+  "productName": "mbo-theme-tool",
+  "copyright": "Copyright © 2025 Chiko",
+  "compression": "maximum",
+  "removePackageScripts": true,
+  "icon": "build/icons/png/256x256.png",
+  "mac": {
+    "category": "public.app-category.utilities",
+    "target": {
+      "target": "dmg",
+      "arch": ["x64", "arm64"]
+    },
+    "icon": "build/icons/mac/icon.icns"
+  },
+  "win": {
+    "target": {
+      "target": "nsis",
+      "arch": ["x64"]
+    },
+    "icon": "build/icons/win/icon.ico",
+    "publisherName": "Chiko"
+  },
+  "linux": {
+    "target": {
+      "target": "AppImage",
+      "arch": ["x64"]
+    }
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "installerIcon": "build/icons/win/icon.ico",
+    "uninstallerIcon": "build/icons/win/icon.ico"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*",
+    "!electron/config/backup/**/*",
+    "!**/*.map",
+    "!**/*.ts",
+    "!src/**/*"
+  ],
+  "extraResources": [
+    {
+      "from": "electron/config",
+      "to": "config",
+      "filter": ["**/*"]
+    }
+  ],
+  "directories": {
+    "buildResources": "assets",
+    "output": "dist_electron"
+  },
+  "asarUnpack": ["electron/config/**/*"],
+  "publish": {
+    "provider": "github",
+    "owner": "chen-ziwen",
+    "repo": "mbo-theme-tool",
+    "releaseType": "release"
+  }
+}
