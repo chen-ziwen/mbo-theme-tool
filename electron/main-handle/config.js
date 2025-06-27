@@ -20,6 +20,18 @@ const ensureUserConfigDir = async () => {
   }
 };
 
+// 初始化配置（应用启动时调用）
+const initializeConfigs = async () => {
+  try {
+    logger.info("开始初始化配置目录和文件");
+    await ensureUserConfigDir();
+    logger.info("配置目录初始化完成", { configDir: USER_CONFIG_DIR });
+  } catch (error) {
+    logger.error("配置初始化失败:", error);
+    throw error;
+  }
+};
+
 // 复制默认配置文件
 const copyDefaultConfigs = async () => {
   try {
@@ -190,4 +202,7 @@ const configHandlers = [
   },
 ];
 
-module.exports = configHandlers;
+module.exports = {
+  configHandlers,
+  initializeConfigs,
+};

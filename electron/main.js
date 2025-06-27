@@ -3,6 +3,7 @@ const path = require("path");
 const registerHandler = require("./main-handle");
 const { setupAutoUpdater, checkForUpdatesAndNotify } = require("./main-handle/updater");
 const { getIconPath, logger } = require("./utils");
+const { initializeConfigs } = require("./main-handle/config");
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 1024,
@@ -27,8 +28,16 @@ const createWindow = () => {
   registerHandler();
 };
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   logger.info("应用启动完成", { version: app.getVersion(), platform: process.platform });
+
+  // 初始化配置目录和文件
+  try {
+    await initializeConfigs();
+    logger.info("配置初始化完成");
+  } catch (error) {
+    logger.error("配置初始化失败:", error);
+  }
 
   createWindow();
 

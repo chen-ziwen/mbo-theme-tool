@@ -1,7 +1,7 @@
 const { ipcMain } = require("electron");
 const dialogHandlers = require("./dialog");
 const fileHandlers = require("./file");
-const configHandlers = require("./config");
+const { configHandlers } = require("./config");
 const { updaterHandlers } = require("./updater");
 
 const mainHandle = [...dialogHandlers, ...fileHandlers, ...configHandlers, ...updaterHandlers];
