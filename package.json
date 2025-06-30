@@ -1,7 +1,7 @@
 {
   "name": "mbo-theme-tool",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "commonjs",
   "main": "electron/main.js",
   "author": "Chiko",
