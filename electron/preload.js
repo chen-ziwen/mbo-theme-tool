@@ -12,4 +12,4 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-contextBridge.exposeInMainWorld("electronAPI", renderer);
+contextBridge.exposeInMainWorld("mt", renderer);

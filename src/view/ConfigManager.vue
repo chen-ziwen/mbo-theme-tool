@@ -65,8 +65,7 @@
                                         :disabled="!editingFolder[index]" @blur="finishEditFolder(index)" />
                                     <a-button-group style="width: 20%">
                                         <a-button v-if="!editingFolder[index]" @click="editFolder(index)">编辑</a-button>
-                                        <a-button v-if="editingFolder[index]"
-                                            @click="cancelEditFolder(index)">取消</a-button>
+                                        <a-button v-if="editingFolder[index]" @click="cancelEditFolder(index)">取消</a-button>
                                         <a-button danger @click="deleteFolder(index)">删除</a-button>
                                     </a-button-group>
                                 </a-input-group>
@@ -80,9 +79,9 @@
         <div class="config-actions">
             <a-space>
                 <a-button type="primary" size="large" @click="saveAllConfigs" :loading="saving">保存配置</a-button>
-                <a-button size="large" @click="backupConfigs" :loading="backing">备份配置</a-button>
-                <a-button size="large" @click="loadConfigs" :loading="loading">重新加载</a-button>
-                <a-button size="large" danger @click="resetConfigs" :loading="resetting">重置配置</a-button>
+                <a-button size="large" @click="backup" :loading="backing">备份配置</a-button>
+                <a-button size="large" @click="load" :loading="loading">重新加载</a-button>
+                <a-button size="large" danger @click="reset" :loading="resetting">重置配置</a-button>
             </a-space>
         </div>
     </div>
@@ -92,11 +91,10 @@
 import { ref, reactive, onMounted } from 'vue';
 import { message, Modal } from 'ant-design-vue';
 
-// 获取electronAPI方法
-const loadConfigsAPI = window.electronAPI.loadConfigs;
-const saveConfigsAPI = window.electronAPI.saveConfigs;
-const backupConfigsAPI = window.electronAPI.backupConfigs;
-const resetConfigsAPI = window.electronAPI.resetConfigs;
+const loadAPI = window.mt.config.load;
+const saveAPI = window.mt.config.save;
+const backupAPI = window.mt.config.backup;
+const resetAPI = window.mt.config.reset;
 
 const activeTab = ref('paths');
 
@@ -137,10 +135,10 @@ const editingFolder = reactive<Record<string, boolean>>({});
 const originalFolders = reactive<string[]>([]);
 
 // 加载配置
-const loadConfigs = async () => {
+const load = async () => {
     loading.value = true;
     try {
-        const configs = await loadConfigsAPI();
+        const configs = await loadAPI();
 
         // 清空现有数据
         filePaths.necessary = {};
@@ -177,10 +175,10 @@ const loadConfigs = async () => {
 };
 
 // 备份配置
-const backupConfigs = async () => {
+const backup = async () => {
     backing.value = true;
     try {
-        const result = await backupConfigsAPI();
+        const result = await backupAPI();
         if (result.success) {
             message.success(`配置备份成功！备份路径：${result.backupPath}`);
         }
@@ -193,7 +191,7 @@ const backupConfigs = async () => {
 };
 
 // 重置配置
-const resetConfigs = async () => {
+const reset = async () => {
     Modal.confirm({
         title: '确认重置配置',
         content: '此操作将重置所有配置为默认值，当前配置会自动备份。确定要继续吗？',
@@ -203,10 +201,10 @@ const resetConfigs = async () => {
         async onOk() {
             resetting.value = true;
             try {
-                const result = await resetConfigsAPI();
+                const result = await resetAPI();
                 if (result.success) {
                     message.success(result.message || '配置已重置为默认值');
-                    await loadConfigs(); // 重新加载配置
+                    await load(); // 重新加载配置
                 }
             } catch (error: any) {
                 message.error(`重置配置失败: ${error.message || error}`);
@@ -239,7 +237,7 @@ const saveAllConfigs = async () => {
             extraFolders
         });
 
-        const result = await saveConfigsAPI({
+        const result = await saveAPI({
             necessary: necessaryForSave,
             optional: optionalForSave,
             extraFolders: [...extraFolders]
@@ -247,7 +245,7 @@ const saveAllConfigs = async () => {
 
         console.log('保存配置结果:', result);
         message.success('配置保存成功');
-        await loadConfigs();
+        await load();
     } catch (error: any) {
         console.error('保存配置失败:', error);
         message.error(`配置保存失败: ${error.message || error}`);
@@ -373,7 +371,7 @@ const finishEditFolder = (index: number) => {
     }
 };
 
-onMounted(loadConfigs);
+onMounted(load);
 </script>
 
 <style scoped lang="scss">

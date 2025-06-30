@@ -43,8 +43,8 @@
 
       <!-- 操作按钮 -->
       <div class="update-actions">
-        <button class="action-btn primary" :class="{ loading: checking, disabled: downloading }"
-          @click="checkForUpdates" :disabled="downloading">
+        <button class="action-btn primary" :class="{ loading: checking, disabled: downloading }" @click="checkForUpdates"
+          :disabled="downloading">
           <svg v-if="checking" class="btn-icon spin" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
           </svg>
@@ -119,7 +119,7 @@ const messageType = ref('info');
 // 获取当前版本
 const getCurrentVersion = async () => {
   try {
-    currentVersion.value = await window.electronAPI.getAppVersion()
+    currentVersion.value = await window.mt.update.getAppVersion()
   } catch (error) {
     console.error('获取版本信息失败:', error)
   }
@@ -130,7 +130,7 @@ const checkForUpdates = async () => {
   message.value = ''
 
   try {
-    const result = await window.electronAPI.checkForUpdates()
+    const result = await window.mt.update.checkForUpdates()
 
     if (result && result.updateAvailable) {
       updateInfo.value = result
@@ -162,12 +162,12 @@ const downloadAndInstall = async () => {
   messageType.value = 'info'
 
   try {
-    await window.electronAPI.downloadUpdate()
+    await window.mt.update.downloadUpdate()
     message.value = '下载完成，应用将重启并安装更新'
     messageType.value = 'success'
 
     setTimeout(() => {
-      window.electronAPI.quitAndInstall()
+      window.mt.update.quitAndInstall()
     }, 1000)
   } catch (error: any) {
     message.value = error?.message || '下载更新失败，请稍后重试'

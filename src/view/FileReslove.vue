@@ -54,9 +54,9 @@ import { reactive, ref, watch } from 'vue';
 import { message } from 'ant-design-vue';
 import FileMessage from './FileMessage.vue';
 
-const openFolder = window.electronAPI.openFolder;
-const checkFolderName = window.electronAPI.checkFolderName;
-const copyFileResource = window.electronAPI.copyFileResource;
+const openFolder = window.mt.dialog.openFolder;
+const checkFolderName = window.mt.file.checkFolderName;
+const copyFileResource = window.mt.file.copyFileResource;
 
 const activeKey = ref<string[]>([]);
 const form = reactive({
