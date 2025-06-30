@@ -2,6 +2,10 @@ const { autoUpdater } = require("electron-updater");
 const { app } = require("electron");
 const { logger } = require("../../utils");
 
+// 禁用签名验证
+process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED = "true";
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
+
 /**
  * 更新服务
  * 提供与IPC无关的更新相关业务逻辑
@@ -11,6 +15,12 @@ class UpdaterService {
    * 设置自动更新器
    */
   static setupAutoUpdater() {
+    // 强制禁用签名验证
+    process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED = "true";
+    autoUpdater.allowPrerelease = false;
+    autoUpdater.allowDowngrade = false;
+    autoUpdater.disableWebInstaller = false;
+    
     // 设置更新服务器 URL
     if (app.isPackaged) {
       autoUpdater.setFeedURL({
@@ -20,6 +30,11 @@ class UpdaterService {
         releaseType: "release"
       });
     }
+    
+    logger.info("签名验证状态:", {
+      allowUnverified: process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED,
+      disableSecurityWarnings: process.env.ELECTRON_DISABLE_SECURITY_WARNINGS
+    });
 
     autoUpdater.on("error", (err) => {
       logger.error("更新出错:", err);
