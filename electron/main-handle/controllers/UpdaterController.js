@@ -30,6 +30,9 @@ class UpdaterController extends BaseController {
 
     // 直接设置 autoUpdater 属性禁用签名验证
     autoUpdater.verifySignature = false;
+    autoUpdater.allowPrerelease = false;
+    autoUpdater.allowDowngrade = false;
+    autoUpdater.disableWebInstaller = false;
 
     // 设置更新服务器 URL
     if (app.isPackaged) {
@@ -85,8 +88,7 @@ class UpdaterController extends BaseController {
         const remoteVersion = result.updateInfo.version;
 
         // 比较版本号，只有远程版本大于当前版本时才认为有更新
-        const isUpdateAvailable =
-          compareVersions(remoteVersion, currentVersion) > 0;
+        const isUpdateAvailable = compareVersions(remoteVersion, currentVersion) > 0;
 
         return {
           updateAvailable: isUpdateAvailable,

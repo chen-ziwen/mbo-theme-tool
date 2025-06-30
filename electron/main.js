@@ -1,3 +1,7 @@
+// 禁用签名验证
+process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED = "true";
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
+
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const { registerHandler, cleanup } = require("./main-handle");
@@ -45,4 +49,4 @@ app.on("window-all-closed", async () => {
   }
 });
 
-app.on("before-quit", () => {});
+app.on("before-quit", () => { });
