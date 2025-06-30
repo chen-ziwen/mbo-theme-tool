@@ -1,4 +1,4 @@
-const BaseRenderer = require("../core/base");
+const BaseRenderer = require("../core/BaseRenderer");
 
 class FileRenderer extends BaseRenderer {
   /**

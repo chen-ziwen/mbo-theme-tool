@@ -1,4 +1,4 @@
-const BaseRenderer = require("../core/base");
+const BaseRenderer = require("../core/BaseRenderer");
 
 class ConfigRenderer extends BaseRenderer {
   /**
@@ -48,9 +48,8 @@ class ConfigRenderer extends BaseRenderer {
       load: this.load.bind(this),
       backup: this.backup.bind(this),
       reset: this.reset.bind(this),
-    }
+    };
   }
-
 }
 
 module.exports = new ConfigRenderer();

@@ -1,12 +1,8 @@
 const BaseController = require("../core/BaseController");
 const { autoUpdater } = require("electron-updater");
 const { app } = require("electron");
-const { logger } = require("../../utils");
+const { logger, compareVersions } = require("../../utils");
 
-/**
- * 更新控制器
- * 处理应用自动更新功能
- */
 class UpdaterController extends BaseController {
   constructor() {
     super("Updater");
@@ -31,10 +27,25 @@ class UpdaterController extends BaseController {
     // 强制禁用签名验证
     process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED = "true";
     process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
-    
+
     // 直接设置 autoUpdater 属性禁用签名验证
     autoUpdater.verifySignature = false;
-    
+
+    // 设置更新服务器 URL
+    if (app.isPackaged) {
+      autoUpdater.setFeedURL({
+        provider: "github",
+        owner: "chen-ziwen",
+        repo: "mbo-theme-tool",
+        releaseType: "release",
+      });
+    }
+
+    logger.info("签名验证状态:", {
+      allowUnverified: process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED,
+      disableSecurityWarnings: process.env.ELECTRON_DISABLE_SECURITY_WARNINGS,
+    });
+
     autoUpdater.on("error", (err) => {
       logger.error("更新出错:", err);
     });
@@ -61,27 +72,6 @@ class UpdaterController extends BaseController {
   }
 
   /**
-   * 版本比较函数
-   * @param {string} version1 版本1
-   * @param {string} version2 版本2
-   * @returns {number} 比较结果
-   */
-  compareVersions(version1, version2) {
-    const v1parts = version1.split(".").map(Number);
-    const v2parts = version2.split(".").map(Number);
-
-    for (let i = 0; i < Math.max(v1parts.length, v2parts.length); i++) {
-      const v1part = v1parts[i] || 0;
-      const v2part = v2parts[i] || 0;
-
-      if (v1part > v2part) return 1;
-      if (v1part < v2part) return -1;
-    }
-
-    return 0;
-  }
-
-  /**
    * 检查更新
    * @param {Object} event IPC事件对象
    */
@@ -95,7 +85,8 @@ class UpdaterController extends BaseController {
         const remoteVersion = result.updateInfo.version;
 
         // 比较版本号，只有远程版本大于当前版本时才认为有更新
-        const isUpdateAvailable = this.compareVersions(remoteVersion, currentVersion) > 0;
+        const isUpdateAvailable =
+          compareVersions(remoteVersion, currentVersion) > 0;
 
         return {
           updateAvailable: isUpdateAvailable,
@@ -127,12 +118,13 @@ class UpdaterController extends BaseController {
       // 强制禁用签名验证
       process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED = "true";
       process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
+
       autoUpdater.verifySignature = false;
-      
+
       logger.info("开始下载更新...");
       logger.info("签名验证状态:", {
         allowUnverified: process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED,
-        disableSecurityWarnings: process.env.ELECTRON_DISABLE_SECURITY_WARNINGS
+        disableSecurityWarnings: process.env.ELECTRON_DISABLE_SECURITY_WARNINGS,
       });
 
       // 检查是否在开发环境
@@ -170,7 +162,8 @@ class UpdaterController extends BaseController {
       if (error.message.includes("net::")) {
         errorMessage = "网络连接失败，请检查网络设置";
       } else if (error.message.includes("404")) {
-        errorMessage = "更新文件不存在，请检查 GitHub Release 是否包含所有必要文件（latest.yml等）";
+        errorMessage =
+          "更新文件不存在，请检查 GitHub Release 是否包含所有必要文件（latest.yml等）";
       } else if (error.message.includes("403")) {
         errorMessage = "访问被拒绝，可能是权限问题";
       } else if (error.message.includes("ENOTFOUND")) {
@@ -212,8 +205,10 @@ class UpdaterController extends BaseController {
    * 控制器初始化
    */
   async onInit() {
+    // 初始化更新服务
     this.setupAutoUpdater();
-    // 自动更新器初始化完成
+    // 检查更新
+    this.checkForUpdatesAndNotify();
   }
 }
 

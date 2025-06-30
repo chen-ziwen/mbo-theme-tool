@@ -2,7 +2,7 @@
  * 渲染进程 api 基类
  * 为各个模块提供统一的api接口和导出方法
  */
-const RendererAPI = require("../core/renderer");
+const RendererAPI = require("../core/Renderer");
 
 class BaseRenderer {
   constructor() {
@@ -22,7 +22,7 @@ class BaseRenderer {
    * 将类实例转换为简单对象导出
    * @returns {Object} 包含所有公共方法的对象
    */
-  toExport() { }
+  toExport() {}
 }
 
 module.exports = BaseRenderer;

@@ -3,10 +3,6 @@ const fs = require("fs").promises;
 const path = require("path");
 const { getUserConfigDir, logger } = require("../../utils");
 
-/**
- * 文件控制器
- * 处理文件操作和主题资源管理
- */
 class FileController extends BaseController {
   constructor() {
     super("File");
@@ -101,14 +97,6 @@ class FileController extends BaseController {
    * @param {string} folderPath 文件夹路径
    */
   async checkFolderName(event, folderPath) {
-    // 参数验证
-    this.validateParams(
-      { folderPath },
-      {
-        folderPath: { required: true, type: "string" },
-      }
-    );
-
     const listInfos = this.createListInfos();
 
     try {
@@ -118,12 +106,16 @@ class FileController extends BaseController {
       await this.checkFileExists(folderPath, false);
 
       // 检查必需资源
-      await this.checkThemeFiles(folderPath, necessary, (realPath, exists, status) => {
-        const text = exists
-          ? "(必须资源) 当前路径下资源存在，检测成功！"
-          : "(必须资源) 当前路径下，资源不存在。请仔细检查该路径下的资源是否存在或命名是否规范!";
-        listInfos[status].push({ path: realPath, text });
-      });
+      await this.checkThemeFiles(
+        folderPath,
+        necessary,
+        (realPath, exists, status) => {
+          const text = exists
+            ? "(必须资源) 当前路径下资源存在，检测成功！"
+            : "(必须资源) 当前路径下，资源不存在。请仔细检查该路径下的资源是否存在或命名是否规范!";
+          listInfos[status].push({ path: realPath, text });
+        }
+      );
 
       // 如果必需资源都存在，启用操作
       if (listInfos.err.length === 0) {
@@ -131,12 +123,16 @@ class FileController extends BaseController {
       }
 
       // 检查可选资源
-      await this.checkThemeFiles(folderPath, optional, (realPath, exists, status) => {
-        const text = exists
-          ? "(非必须资源) 当前路径下资源存在，检测成功！"
-          : "(非必须资源) 当前路径下，资源不存在。请仔细检查该路径下的资源是否存在或命名是否规范!";
-        listInfos[status].push({ path: realPath, text });
-      });
+      await this.checkThemeFiles(
+        folderPath,
+        optional,
+        (realPath, exists, status) => {
+          const text = exists
+            ? "(非必须资源) 当前路径下资源存在，检测成功！"
+            : "(非必须资源) 当前路径下，资源不存在。请仔细检查该路径下的资源是否存在或命名是否规范!";
+          listInfos[status].push({ path: realPath, text });
+        }
+      );
 
       return listInfos;
     } catch (error) {
@@ -150,16 +146,6 @@ class FileController extends BaseController {
    * @param {Object} params 参数对象
    */
   async copyFileResource(event, { theme, src, destPath }) {
-    // 参数验证
-    this.validateParams(
-      { theme, src, destPath },
-      {
-        theme: { required: true, type: "string" },
-        src: { required: true, type: "string" },
-        destPath: { required: true, type: "string" },
-      }
-    );
-
     const listInfos = this.createListInfos();
 
     try {
@@ -175,7 +161,9 @@ class FileController extends BaseController {
       const allResources = { ...necessary, ...optional };
       for (const [key, value] of Object.entries(allResources)) {
         const resourcePath = path.join(destPath, "切图", key);
-        const destFilePath = path.join(src, value).replaceAll("${theme}", theme);
+        const destFilePath = path
+          .join(src, value)
+          .replaceAll("${theme}", theme);
 
         const exists = await this.checkFileExists(resourcePath);
 

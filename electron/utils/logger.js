@@ -63,7 +63,7 @@ module.exports = {
   info: logger.info,
   warn: logger.warn,
   error: logger.error,
-  debug: logger.debug,
+  debug: logger.info,
   getLogDir,
   logger,
 };

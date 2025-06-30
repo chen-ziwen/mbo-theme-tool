@@ -15,8 +15,9 @@ fs.readdirSync(modulePath).forEach((file) => {
   const moduleName = path.basename(file, ".js");
   // 导入模块
   const moduleContent = require(path.resolve(modulePath, moduleName));
+  console.log("module name", moduleContent);
   // 添加到导出对象
-  modules[moduleName] = moduleContent.toExport();
+  modules[moduleName.toLocaleLowerCase()] = moduleContent.toExport();
 });
 
 module.exports = modules;

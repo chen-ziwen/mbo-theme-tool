@@ -1,11 +1,10 @@
 const { ipcMain } = require("electron");
 const { logger } = require("../../utils");
-const { eventBus } = require("./EventBus");
-const { EventType } = require("./types");
+// const middlewares = require('../middlewares');
 
 /**
  * IPC管理器 - 统一管理所有IPC通信
- * 支持中间件、事件总线、性能监控等现代化特性
+ * 支持中间件、性能监控等特性
  */
 class IPCManager {
   constructor() {
@@ -49,148 +48,158 @@ class IPCManager {
   /**
    * 注册监听器
    * @param {string} channel 通道名
-   * @param {Function} listener 监听函数
-   * @param {Object} options 选项
+   * @param {Function} handler 处理函数
    */
-  on(channel, listener, options = {}) {
-    if (this.handlers.has(channel)) {
-      logger.warn(`IPC通道 '${channel}' 已存在，将被覆盖`);
-    }
-
-    const wrappedListener = this.wrapHandler(listener, channel, options);
-    this.handlers.set(channel, { handler: wrappedListener, options });
-
-    ipcMain.on(channel, wrappedListener);
+  on(channel, handler) {
+    const wrappedHandler = this.wrapListener(handler, channel);
+    this.handlers.set(channel, { handler: wrappedHandler, type: "listener" });
+    ipcMain.on(channel, wrappedHandler);
   }
 
   /**
-   * 包装处理器，添加中间件、错误处理和性能监控
+   * 包装处理器
    */
   wrapHandler(handler, channel, options) {
     return async (event, ...args) => {
       const startTime = Date.now();
-      const callId = `${channel}_${startTime}_${Math.random().toString(36).substr(2, 9)}`;
-
-      // 更新统计
-      this.stats.totalCalls++;
-
-      // 发射调用开始事件
-      eventBus.safeEmit(EventType.ROUTE_CALL, {
+      const context = {
+        event,
         channel,
-        callId,
+        args: [...args], // 创建副本，允许中间件修改
+        options,
         startTime,
-        args: options.logArgs ? args : "[隐藏]",
-      });
+        data: {}, // 共享数据对象，中间件可以在此存储数据
+      };
 
       try {
-        // 构建中间件链
-        const allMiddlewares = [...this.middlewares];
-        if (options.middlewares) {
-          allMiddlewares.push(...options.middlewares);
-        }
+        // 执行中间件
+        await this.executeMiddlewares(context);
 
-        // 执行中间件链
-        let index = 0;
-        const next = async () => {
-          if (index < allMiddlewares.length) {
-            const middleware = allMiddlewares[index++];
-            const context = { event, channel, args, options };
-            return await middleware(context, next);
-          } else {
-            // 执行最终处理器
-            if (options.timeout) {
-              return await Promise.race([
-                handler(event, ...args),
-                new Promise((_, reject) =>
-                  setTimeout(() => reject(new Error(`IPC调用超时: ${channel}`)), options.timeout)
-                ),
-              ]);
-            } else {
-              return await handler(event, ...args);
-            }
-          }
-        };
+        // 执行处理器，使用中间件可能修改过的参数
+        const result = await handler(event, ...context.args);
 
-        const result = await next();
+        const duration = Date.now() - startTime;
+        this.updateStats(true, duration);
+        this.recordPerformance(channel, duration, true);
 
-        const endTime = Date.now();
-        const duration = endTime - startTime;
-
-        // 更新统计
-        this.stats.successCalls++;
-        this.updatePerformanceStats(duration);
-
-        // 记录性能数据
-        this.recordPerformance({
-          channel,
-          callId,
-          startTime,
-          endTime,
-          duration,
-          success: true,
-        });
-
-        // 记录成功日志
-        if (options.logSuccess !== false) {
-          logger.info(`IPC调用成功: ${channel} (${duration}ms)`);
-        }
-
-        // 发射调用成功事件
-        eventBus.safeEmit("ipc:call:success", {
-          channel,
-          callId,
-          duration,
-          result: options.logResult ? result : "[隐藏]",
-        });
+        logger.info(`IPC调用成功: ${channel} (${duration}ms)`);
 
         return result;
       } catch (error) {
-        const endTime = Date.now();
-        const duration = endTime - startTime;
+        const duration = Date.now() - startTime;
+        this.updateStats(false, duration);
+        this.recordPerformance(channel, duration, false);
 
-        // 更新统计
-        this.stats.errorCalls++;
-
-        // 记录性能数据
-        this.recordPerformance({
-          channel,
-          callId,
-          startTime,
-          endTime,
-          duration,
-          success: false,
+        logger.error(`IPC调用失败: ${channel}`, {
           error: error.message,
-        });
-
-        logger.error(`IPC调用失败: ${channel} (${duration}ms)`, {
-          error: error.message,
-          stack: error.stack,
-          args: options.logArgs ? args : "[隐藏]",
-        });
-
-        // 发射错误事件
-        eventBus.safeEmit(EventType.ERROR_OCCURRED, {
-          channel,
-          callId,
           duration,
-          error: {
-            message: error.message,
-            stack: error.stack,
-          },
+          args: args.length,
         });
 
-        if (options.throwError !== false) {
-          throw error;
-        }
-
-        return { error: error.message };
+        throw error;
       }
     };
   }
 
   /**
+   * 包装监听器
+   */
+  wrapListener(handler, channel) {
+    return async (event, ...args) => {
+      try {
+        await handler(event, ...args);
+        logger.info(`IPC监听器执行: ${channel}`);
+      } catch (error) {
+        logger.error(`IPC监听器错误: ${channel}`, error);
+      }
+    };
+  }
+
+  /**
+   * 执行中间件
+   */
+  async executeMiddlewares(context) {
+    for (const middleware of this.middlewares) {
+      await middleware(context);
+    }
+  }
+
+  /**
+   * 更新统计信息
+   */
+  updateStats(success, duration) {
+    this.stats.totalCalls++;
+    if (success) {
+      this.stats.successCalls++;
+    } else {
+      this.stats.errorCalls++;
+    }
+
+    // 计算平均响应时间
+    const totalTime =
+      this.stats.averageResponseTime * (this.stats.totalCalls - 1) + duration;
+    this.stats.averageResponseTime = totalTime / this.stats.totalCalls;
+  }
+
+  /**
+   * 记录性能数据
+   */
+  recordPerformance(channel, duration, success) {
+    this.performanceData.push({
+      channel,
+      duration,
+      success,
+      timestamp: Date.now(),
+    });
+
+    // 限制性能数据数量
+    if (this.performanceData.length > this.maxPerformanceData) {
+      this.performanceData.shift();
+    }
+  }
+
+  /**
+   * 获取统计信息
+   */
+  getStats() {
+    return {
+      ...this.stats,
+      successRate:
+        this.stats.totalCalls > 0
+          ? ((this.stats.successCalls / this.stats.totalCalls) * 100).toFixed(
+              2
+            ) + "%"
+          : "0%",
+      handlersCount: this.handlers.size,
+      middlewaresCount: this.middlewares.length,
+    };
+  }
+
+  /**
+   * 获取性能数据
+   */
+  getPerformanceData() {
+    return this.performanceData.slice(-100); // 返回最近100条记录
+  }
+
+  /**
+   * 获取慢调用
+   */
+  getSlowCalls(threshold = 1000) {
+    return this.performanceData
+      .filter((data) => data.duration > threshold)
+      .slice(-20); // 返回最近20条慢调用
+  }
+
+  /**
+   * 获取所有通道
+   */
+  getChannels() {
+    return Array.from(this.handlers.keys());
+  }
+
+  /**
    * 移除处理器
-   * @param {string} channel 通道名
    */
   removeHandler(channel) {
     if (this.handlers.has(channel)) {
@@ -200,130 +209,58 @@ class IPCManager {
   }
 
   /**
-   * 获取所有已注册的通道
+   * 移除监听器
    */
-  getChannels() {
-    return Array.from(this.handlers.keys());
-  }
-
-  /**
-   * 更新性能统计
-   */
-  updatePerformanceStats(duration) {
-    const totalResponseTime =
-      this.stats.averageResponseTime * (this.stats.successCalls - 1) + duration;
-    this.stats.averageResponseTime = Math.round(totalResponseTime / this.stats.successCalls);
-  }
-
-  /**
-   * 记录性能数据
-   */
-  recordPerformance(data) {
-    this.performanceData.push(data);
-
-    // 限制数据大小
-    if (this.performanceData.length > this.maxPerformanceData) {
-      this.performanceData = this.performanceData.slice(-this.maxPerformanceData);
+  removeListener(channel) {
+    if (this.handlers.has(channel)) {
+      const handler = this.handlers.get(channel);
+      if (handler.type === "listener") {
+        ipcMain.removeListener(channel, handler.handler);
+        this.handlers.delete(channel);
+      }
     }
-  }
-
-  /**
-   * 获取性能统计
-   */
-  getStats() {
-    return {
-      ...this.stats,
-      successRate:
-        this.stats.totalCalls > 0
-          ? Math.round((this.stats.successCalls / this.stats.totalCalls) * 100)
-          : 0,
-      errorRate:
-        this.stats.totalCalls > 0
-          ? Math.round((this.stats.errorCalls / this.stats.totalCalls) * 100)
-          : 0,
-    };
-  }
-
-  /**
-   * 获取性能数据
-   */
-  getPerformanceData(channel = null, limit = 100) {
-    let data = this.performanceData;
-
-    if (channel) {
-      data = data.filter((item) => item.channel === channel);
-    }
-
-    return data.slice(-limit);
-  }
-
-  /**
-   * 获取慢查询
-   */
-  getSlowCalls(threshold = 1000) {
-    return this.performanceData.filter((item) => item.duration > threshold);
-  }
-
-  /**
-   * 重置统计数据
-   */
-  resetStats() {
-    this.stats = {
-      totalCalls: 0,
-      successCalls: 0,
-      errorCalls: 0,
-      averageResponseTime: 0,
-    };
-    this.performanceData = [];
   }
 
   /**
    * 清理所有处理器
    */
   clear() {
-    for (const channel of this.handlers.keys()) {
-      this.removeHandler(channel);
+    for (const [channel, handler] of this.handlers) {
+      if (handler.type === "listener") {
+        ipcMain.removeListener(channel, handler.handler);
+      } else {
+        ipcMain.removeHandler(channel);
+      }
     }
-    this.resetStats();
+    this.handlers.clear();
   }
 
   /**
    * 销毁管理器
    */
-  destroy() {
-    this.clear();
-    this.middlewares = [];
-    eventBus.safeEmit("ipc:manager:destroyed");
+  async destroy() {
+    try {
+      this.clear();
+      this.middlewares = [];
+      this.performanceData = [];
+
+      // 重置统计信息
+      this.stats = {
+        totalCalls: 0,
+        successCalls: 0,
+        errorCalls: 0,
+        averageResponseTime: 0,
+      };
+    } catch (error) {
+      logger.error("销毁IPC管理器时出错:", error);
+    }
   }
 }
 
 // 创建单例实例
 const ipcManager = new IPCManager();
 
-// 添加默认中间件
-ipcManager.use(async (context, next) => {
-  const { channel, args, options } = context;
-  // 请求日志中间件
-  if (options.logRequest !== false) {
-    logger.debug(`IPC请求: ${channel}`, {
-      args: options.logArgs ? args : "[隐藏]",
-      timestamp: new Date().toISOString(),
-    });
-  }
-  return await next();
-});
-
-// 添加安全中间件
-ipcManager.use(async (context, next) => {
-  const { args, options } = context;
-  // 参数验证
-  if (options.validateArgs && typeof options.validateArgs === "function") {
-    const validation = options.validateArgs(args);
-    if (!validation.valid) {
-      throw new Error(`参数验证失败: ${validation.message}`);
-    }
-  }
-  return await next();
-});
+// 添加全局中间件
+// middlewares.forEach((middleware) => ipcManager.use(middleware));
 
 module.exports = ipcManager;
