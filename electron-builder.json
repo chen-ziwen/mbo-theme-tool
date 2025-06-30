@@ -15,6 +15,7 @@
     "icon": "build/icons/mac/icon.icns"
   },
   "win": {
+    "verifyUpdateCodeSignature": false,
     "target": {
       "target": "nsis",
       "arch": ["x64"]
