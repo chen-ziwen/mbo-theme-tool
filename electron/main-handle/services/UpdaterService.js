@@ -11,6 +11,16 @@ class UpdaterService {
    * 设置自动更新器
    */
   static setupAutoUpdater() {
+    // 设置更新服务器 URL
+    if (app.isPackaged) {
+      autoUpdater.setFeedURL({
+        provider: "github",
+        owner: "chen-ziwen",
+        repo: "mbo-theme-tool",
+        releaseType: "release"
+      });
+    }
+
     autoUpdater.on("error", (err) => {
       logger.error("更新出错:", err);
     });

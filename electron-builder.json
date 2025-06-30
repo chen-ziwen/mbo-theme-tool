@@ -33,7 +33,8 @@
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "installerIcon": "build/icons/win/icon.ico",
-    "uninstallerIcon": "build/icons/win/icon.ico"
+    "uninstallerIcon": "build/icons/win/icon.ico",
+    "artifactName": "${productName}-Setup-${version}.${ext}"
   },
   "files": [
     "dist/**/*",
