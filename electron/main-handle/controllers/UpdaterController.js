@@ -32,6 +32,9 @@ class UpdaterController extends BaseController {
     process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED = "true";
     process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
     
+    // 直接设置 autoUpdater 属性禁用签名验证
+    autoUpdater.verifySignature = false;
+    
     autoUpdater.on("error", (err) => {
       logger.error("更新出错:", err);
     });
@@ -124,6 +127,7 @@ class UpdaterController extends BaseController {
       // 强制禁用签名验证
       process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED = "true";
       process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
+      autoUpdater.verifySignature = false;
       
       logger.info("开始下载更新...");
       logger.info("签名验证状态:", {

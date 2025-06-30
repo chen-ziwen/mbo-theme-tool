@@ -17,6 +17,10 @@ class UpdaterService {
   static setupAutoUpdater() {
     // 强制禁用签名验证
     process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED = "true";
+    process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
+    
+    // 直接设置 autoUpdater 属性禁用签名验证
+    autoUpdater.verifySignature = false;
     autoUpdater.allowPrerelease = false;
     autoUpdater.allowDowngrade = false;
     autoUpdater.disableWebInstaller = false;
