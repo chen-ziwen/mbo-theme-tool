@@ -5,6 +5,7 @@
   "compression": "maximum",
   "removePackageScripts": true,
   "icon": "build/icons/png/256x256.png",
+  "verifyUpdateCodeSignature": false,
   "mac": {
     "category": "public.app-category.utilities",
     "target": {
