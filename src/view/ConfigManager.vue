@@ -11,14 +11,20 @@
                         </div>
                         <div class="path-list">
                             <div v-for="(item, key) in filePaths.necessary" :key="item.path" class="path-item">
-                                <a-input-group compact>
-                                    <a-input v-model:value="item.name" placeholder="文件名" style="width: 30%"
-                                        :disabled="!editingPaths.necessary[key]" @blur="finishEditNecessaryPath(key)" />
-                                    <a-input v-model:value="item.path" placeholder="文件路径" style="width: 50%"
-                                        :disabled="!editingPaths.necessary[key]" @blur="finishEditNecessaryPath(key)" />
-                                    <a-button-group style="width: 20%">
+                                <a-input-group class="input-button-group">
+                                    <a-input v-model:value="item.name" placeholder="文件名"
+                                        :class="{ 'input-with-edit': editingPaths.necessary[key] }"
+                                        :style="editingPaths.necessary[key] ? 'width: 25%' : 'width: 30%'"
+                                        :disabled="!editingPaths.necessary[key]" />
+                                    <a-input v-model:value="item.path" placeholder="文件路径"
+                                        :class="{ 'input-with-edit': editingPaths.necessary[key] }"
+                                        :style="editingPaths.necessary[key] ? 'width: 40%' : 'width: 50%'"
+                                        :disabled="!editingPaths.necessary[key]" />
+                                    <a-button-group :style="editingPaths.necessary[key] ? 'width: 35%' : 'width: 20%'">
                                         <a-button v-if="!editingPaths.necessary[key]"
                                             @click="editNecessaryPath(key)">编辑</a-button>
+                                        <a-button v-if="editingPaths.necessary[key]"
+                                            @click="finishEditNecessaryPath(key)" type="primary">完成</a-button>
                                         <a-button v-if="editingPaths.necessary[key]"
                                             @click="cancelEditNecessaryPath(key)">取消</a-button>
                                         <a-button danger @click="deleteNecessaryPath(key)">删除</a-button>
@@ -33,14 +39,20 @@
                         </div>
                         <div class="path-list">
                             <div v-for="(item, key) in filePaths.optional" :key="key" class="path-item">
-                                <a-input-group compact>
-                                    <a-input v-model:value="item.name" placeholder="文件名" style="width: 30%"
-                                        :disabled="!editingPaths.optional[key]" @blur="finishEditOptionalPath(key)" />
-                                    <a-input v-model:value="item.path" placeholder="文件路径" style="width: 50%"
-                                        :disabled="!editingPaths.optional[key]" @blur="finishEditOptionalPath(key)" />
-                                    <a-button-group style="width: 20%">
+                                <a-input-group class="input-button-group">
+                                    <a-input v-model:value="item.name" placeholder="文件名"
+                                        :class="{ 'input-with-edit': editingPaths.optional[key] }"
+                                        :style="editingPaths.optional[key] ? 'width: 25%' : 'width: 30%'"
+                                        :disabled="!editingPaths.optional[key]" />
+                                    <a-input v-model:value="item.path" placeholder="文件路径"
+                                        :class="{ 'input-with-edit': editingPaths.optional[key] }"
+                                        :style="editingPaths.optional[key] ? 'width: 40%' : 'width: 50%'"
+                                        :disabled="!editingPaths.optional[key]" />
+                                    <a-button-group :style="editingPaths.optional[key] ? 'width: 35%' : 'width: 20%'">
                                         <a-button v-if="!editingPaths.optional[key]"
                                             @click="editOptionalPath(key)">编辑</a-button>
+                                        <a-button v-if="editingPaths.optional[key]" @click="finishEditOptionalPath(key)"
+                                            type="primary">完成</a-button>
                                         <a-button v-if="editingPaths.optional[key]"
                                             @click="cancelEditOptionalPath(key)">取消</a-button>
                                         <a-button danger @click="deleteOptionalPath(key)">删除</a-button>
@@ -60,12 +72,17 @@
                         </div>
                         <div class="folder-list">
                             <div v-for="(_, index) in extraFolders" :key="index" class="folder-item">
-                                <a-input-group compact>
-                                    <a-input v-model:value="extraFolders[index]" placeholder="文件夹路径" style="width: 80%"
-                                        :disabled="!editingFolder[index]" @blur="finishEditFolder(index)" />
-                                    <a-button-group style="width: 20%">
+                                <a-input-group class="input-button-group">
+                                    <a-input v-model:value="extraFolders[index]" placeholder="文件夹路径"
+                                        :class="{ 'input-with-edit': editingFolder[index] }"
+                                        :style="editingFolder[index] ? 'width: 65%' : 'width: 80%'"
+                                        :disabled="!editingFolder[index]" />
+                                    <a-button-group :style="editingFolder[index] ? 'width: 35%' : 'width: 20%'">
                                         <a-button v-if="!editingFolder[index]" @click="editFolder(index)">编辑</a-button>
-                                        <a-button v-if="editingFolder[index]" @click="cancelEditFolder(index)">取消</a-button>
+                                        <a-button v-if="editingFolder[index]" @click="finishEditFolder(index)"
+                                            type="primary">完成</a-button>
+                                        <a-button v-if="editingFolder[index]"
+                                            @click="cancelEditFolder(index)">取消</a-button>
                                         <a-button danger @click="deleteFolder(index)">删除</a-button>
                                     </a-button-group>
                                 </a-input-group>
@@ -309,7 +326,7 @@ const editOptionalPath = optionalPathOps.editPath;
 const cancelEditOptionalPath = optionalPathOps.cancelEditPath;
 const deleteOptionalPath = optionalPathOps.deletePath;
 
-// 完成编辑操作（失去焦点时调用）
+// 完成编辑操作（点击完成按钮时调用）
 const finishEditNecessaryPath = (key: string) => {
     if (editingPaths.necessary[key]) {
         editingPaths.necessary[key] = false;
@@ -362,7 +379,7 @@ const deleteFolder = (index: number) => {
     });
 };
 
-// 完成文件夹编辑操作（失去焦点时调用）
+// 完成文件夹编辑操作（点击完成按钮时调用）
 const finishEditFolder = (index: number) => {
     if (editingFolder[index]) {
         editingFolder[index] = false;
@@ -375,6 +392,15 @@ onMounted(load);
 </script>
 
 <style scoped lang="scss">
+// 定义通用变量
+$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$primary-gradient-hover: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+$danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+$danger-gradient-hover: linear-gradient(135deg, #ff5252 0%, #e53935 100%);
+$border-radius: 6px;
+$box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+$transition: all 0.3s ease;
+
 .config-manager {
     padding: 24px;
     height: 100%;
@@ -404,11 +430,11 @@ onMounted(load);
         }
 
         &::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: $primary-gradient;
             border-radius: 4px;
 
             &:hover {
-                background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+                background: $primary-gradient-hover;
             }
         }
 
@@ -435,7 +461,7 @@ onMounted(load);
                         content: '';
                         width: 4px;
                         height: 20px;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: $primary-gradient;
                         margin-right: 12px;
                         border-radius: 2px;
                     }
@@ -452,29 +478,14 @@ onMounted(load);
                     margin-bottom: 16px;
                     padding: 16px;
                     background: rgba(255, 255, 255, 0.8);
-                    border-radius: 8px;
+                    border-radius: $border-radius;
                     border: 1px solid rgba(0, 0, 0, 0.06);
-                    transition: all 0.3s ease;
+                    transition: $transition;
 
                     &:hover {
                         transform: translateY(-2px);
-                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                        box-shadow: $box-shadow;
                         border-color: #1890ff;
-                    }
-
-                    :deep(.ant-input-group) {
-                        display: flex;
-                        align-items: stretch;
-                        width: 100%;
-
-                        .ant-input {
-                            flex: 1;
-                        }
-
-                        .ant-btn-group {
-                            display: flex;
-                            align-items: center;
-                        }
                     }
                 }
             }
@@ -487,12 +498,123 @@ onMounted(load);
         border-radius: 12px;
         margin-top: 16px;
         text-align: center;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: $box-shadow;
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
 }
 
+// 输入组和按钮样式
+:deep(.ant-input-group) {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+
+    &.input-button-group {
+        transition: $transition;
+    }
+
+    .ant-input {
+        flex: 1;
+        transition: width 0.3s ease;
+        border-radius: $border-radius !important;
+        border: 1px solid #d9d9d9;
+        padding: 4px 11px;
+
+        &:first-child {
+            margin-left: 0;
+        }
+
+        &:focus {
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+
+        &:disabled {
+            background: #f5f5f5;
+            color: #999;
+        }
+
+        &.input-with-edit {
+            border-color: #1890ff;
+        }
+    }
+
+    .ant-btn-group {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        gap: 4px;
+        transition: width 0.3s ease;
+
+        .ant-btn {
+            border-radius: $border-radius;
+            margin: 0 2px;
+            font-weight: 500;
+            transition: $transition;
+            flex: 1;
+            min-width: 0;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:first-child {
+                margin-left: 0;
+            }
+
+            &:last-child {
+                margin-right: 0;
+            }
+
+            &.ant-btn-primary {
+                background: $primary-gradient;
+                border: none;
+
+                &:hover {
+                    background: $primary-gradient-hover;
+                    transform: translateY(-1px);
+                }
+            }
+
+            &.ant-btn-dangerous {
+                background: $danger-gradient;
+                border: none;
+                color: white;
+
+                &:hover {
+                    background: $danger-gradient-hover;
+                    transform: translateY(-1px);
+                }
+            }
+
+            &:not(.ant-btn-primary):not(.ant-btn-dangerous) {
+                background: rgba(255, 255, 255, 0.9);
+                border: 1px solid #d9d9d9;
+
+                &:hover {
+                    border-color: #1890ff;
+                    color: #1890ff;
+                    transform: translateY(-1px);
+                }
+            }
+        }
+    }
+}
+
+// 设置按钮组与输入框的间距
+.path-item,
+.folder-item {
+    :deep(.ant-input-group) {
+        .ant-btn-group {
+            margin-left: 12px !important;
+        }
+    }
+}
+
+// 标签页样式
 :deep(.ant-tabs) {
     .ant-tabs-nav {
         margin-bottom: 0;
@@ -502,7 +624,7 @@ onMounted(load);
             border: none;
             background: rgba(255, 255, 255, 0.6);
             margin-right: 4px;
-            transition: all 0.3s ease;
+            transition: $transition;
 
             &:hover {
                 background: rgba(255, 255, 255, 0.8);
@@ -525,80 +647,7 @@ onMounted(load);
     }
 }
 
-:deep(.ant-input-group) {
-    display: flex;
-    align-items: center;
-
-    .ant-input {
-        border-radius: 6px;
-        border: 1px solid #d9d9d9;
-        transition: all 0.3s ease;
-
-        &:focus {
-            border-color: #1890ff;
-            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
-        }
-
-        &:disabled {
-            background: #f5f5f5;
-            color: #999;
-        }
-    }
-}
-
-:deep(.ant-btn-group) {
-    display: flex;
-    width: 100%;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
-
-    .ant-btn {
-        border-radius: 6px;
-        margin-left: 0;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        flex-shrink: 0;
-        min-width: 60px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        &.ant-btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-
-            &:hover {
-                background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-                transform: translateY(-1px);
-            }
-        }
-
-        &.ant-btn-dangerous {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-            border: none;
-            color: white;
-
-            &:hover {
-                background: linear-gradient(135deg, #ff5252 0%, #e53935 100%);
-                transform: translateY(-1px);
-            }
-        }
-
-        &:not(.ant-btn-primary):not(.ant-btn-dangerous) {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid #d9d9d9;
-
-            &:hover {
-                border-color: #1890ff;
-                color: #1890ff;
-                transform: translateY(-1px);
-            }
-        }
-    }
-}
-
+// 底部操作栏按钮样式
 :deep(.ant-space) {
     .ant-btn {
         padding: 8px 24px;
@@ -606,14 +655,14 @@ onMounted(load);
         border-radius: 8px;
         font-weight: 600;
         font-size: 14px;
-        transition: all 0.3s ease;
+        transition: $transition;
 
         &.ant-btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: $primary-gradient;
             border: none;
 
             &:hover {
-                background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+                background: $primary-gradient-hover;
                 transform: translateY(-2px);
                 box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
             }

@@ -122,6 +122,9 @@ class UpdaterController extends BaseController {
       process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
 
       autoUpdater.verifySignature = false;
+      autoUpdater.allowPrerelease = false;
+      autoUpdater.allowDowngrade = false;
+      autoUpdater.disableWebInstaller = false;
 
       logger.info("开始下载更新...");
       logger.info("签名验证状态:", {
