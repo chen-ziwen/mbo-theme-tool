@@ -9,7 +9,10 @@
     "category": "public.app-category.utilities",
     "target": {
       "target": "dmg",
-      "arch": ["x64", "arm64"]
+      "arch": [
+        "x64",
+        "arm64"
+      ]
     },
     "icon": "build/icons/mac/icon.icns"
   },
@@ -17,7 +20,9 @@
     "verifyUpdateCodeSignature": false,
     "target": {
       "target": "nsis",
-      "arch": ["x64"]
+      "arch": [
+        "x64"
+      ]
     },
     "icon": "build/icons/win/icon.ico",
     "publisherName": "Chiko"
@@ -25,7 +30,9 @@
   "linux": {
     "target": {
       "target": "AppImage",
-      "arch": ["x64"]
+      "arch": [
+        "x64"
+      ]
     }
   },
   "nsis": {
@@ -49,14 +56,18 @@
     {
       "from": "electron/config",
       "to": "config",
-      "filter": ["**/*"]
+      "filter": [
+        "**/*"
+      ]
     }
   ],
   "directories": {
     "buildResources": "assets",
     "output": "dist_electron"
   },
-  "asarUnpack": ["electron/config/**/*"],
+  "asarUnpack": [
+    "electron/config/**/*"
+  ],
   "publish": {
     "provider": "github",
     "owner": "chen-ziwen",

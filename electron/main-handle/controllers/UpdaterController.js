@@ -24,15 +24,7 @@ class UpdaterController extends BaseController {
    * 设置自动更新器
    */
   setupAutoUpdater() {
-    // 强制禁用签名验证
-    process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED = "true";
-    process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
-
-    // 直接设置 autoUpdater 属性禁用签名验证
     autoUpdater.verifySignature = false;
-    autoUpdater.allowPrerelease = false;
-    autoUpdater.allowDowngrade = false;
-    autoUpdater.disableWebInstaller = false;
 
     // 设置更新服务器 URL
     if (app.isPackaged) {
@@ -43,11 +35,6 @@ class UpdaterController extends BaseController {
         releaseType: "release",
       });
     }
-
-    logger.info("签名验证状态:", {
-      allowUnverified: process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED,
-      disableSecurityWarnings: process.env.ELECTRON_DISABLE_SECURITY_WARNINGS,
-    });
 
     autoUpdater.on("error", (err) => {
       logger.error("更新出错:", err);
@@ -117,20 +104,7 @@ class UpdaterController extends BaseController {
    */
   async downloadUpdate(event) {
     try {
-      // 强制禁用签名验证
-      process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED = "true";
-      process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
-
-      autoUpdater.verifySignature = false;
-      autoUpdater.allowPrerelease = false;
-      autoUpdater.allowDowngrade = false;
-      autoUpdater.disableWebInstaller = false;
-
       logger.info("开始下载更新...");
-      logger.info("签名验证状态:", {
-        allowUnverified: process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED,
-        disableSecurityWarnings: process.env.ELECTRON_DISABLE_SECURITY_WARNINGS,
-      });
 
       // 检查是否在开发环境
       if (!app.isPackaged) {
