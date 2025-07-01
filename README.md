@@ -10,10 +10,15 @@
 
 ## 示例
 
-![image](https://github.com/user-attachments/assets/fa4608e4-4f14-44d3-817a-3142fc47111a)
-![image](https://github.com/user-attachments/assets/eef1677c-c07b-4e6e-a793-6efa2bb5b2f3)
-![image](https://github.com/user-attachments/assets/362c9c09-abdc-4788-be88-c42755dbc664)
-![image](https://github.com/user-attachments/assets/9f839c7c-9cd8-4cef-a4f9-fd165a89a263)
+### 部分截图
+![image](https://github.com/user-attachments/assets/c13e7b1a-67c5-4f97-88a2-d241d24e43e1)
+![image](https://github.com/user-attachments/assets/bee2ab1e-c742-4f29-a41c-5e89840d755a)
+![image](https://github.com/user-attachments/assets/25241b84-c53d-4778-b553-344bb466c53c)
+![image](https://github.com/user-attachments/assets/f114aa5f-7532-4472-be1b-39ccdae0d75d)
+
+### 成功执行
+![image](https://github.com/user-attachments/assets/379859b4-8566-45ba-8887-94ec332e4d35)
+![image](https://github.com/user-attachments/assets/2e13514b-a537-4264-a7a2-43d9b00eda9d)
 
 ## 运行
 
