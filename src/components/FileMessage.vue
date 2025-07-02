@@ -11,7 +11,6 @@
 </template>
 
 <script lang='ts' setup>
-
 interface FileMessageProps {
     textColor: string;
     paths: { path: string, text: string }[];
@@ -19,7 +18,6 @@ interface FileMessageProps {
 }
 
 defineProps<FileMessageProps>();
-
 </script>
 
 <style lang='scss' scoped>
@@ -29,25 +27,53 @@ defineProps<FileMessageProps>();
     flex-wrap: wrap;
     gap: 12px;
 
+    &[data-type="success"] {
+        .file-check-info {
+            border-left-color: #52c41a;
+            background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+
+            &:hover {
+                background: linear-gradient(135deg, #f0f9e8 0%, #d1f2b8 100%);
+            }
+        }
+    }
+
+    &[data-type="fail"] {
+        .file-check-info {
+            border-left-color: #ff4d4f;
+            background: linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%);
+
+            &:hover {
+                background: linear-gradient(135deg, #ffeae8 0%, #ffc1c1 100%);
+            }
+
+            // 非必要资源失败 - 橙色背景
+            &.optional-fail {
+                border-left-color: #fa8c16;
+                background: linear-gradient(135deg, #fff7e6 0%, #ffd591 100%);
+
+                &:hover {
+                    background: linear-gradient(135deg, #fff1d6 0%, #ffcc7a 100%);
+                }
+            }
+        }
+    }
+
     .file-check-info {
         padding: 12px 16px;
         margin-bottom: 0;
         border: none;
         background: rgba(255, 255, 255, 0.9);
-        border-radius: 8px;
+        border-radius: $border-radius;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         word-break: break-all;
-        transition: all 0.3s ease;
+        transition: $transition;
         position: relative;
         border-left: 4px solid transparent;
         display: flex;
         flex-direction: column;
         gap: 4px;
-
-        &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-        }
+        @include hover-lift;
 
         .index-number {
             font-weight: 600;
@@ -68,38 +94,6 @@ defineProps<FileMessageProps>();
             color: #666;
             font-size: 13px;
             line-height: 1.4;
-        }
-    }
-}
-
-.file-message[data-type="success"] {
-    .file-check-info {
-        border-left-color: #52c41a;
-        background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
-
-        &:hover {
-            background: linear-gradient(135deg, #f0f9e8 0%, #d1f2b8 100%);
-        }
-    }
-}
-
-.file-message[data-type="fail"] {
-    .file-check-info {
-        border-left-color: #ff4d4f;
-        background: linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%);
-
-        &:hover {
-            background: linear-gradient(135deg, #ffeae8 0%, #ffc1c1 100%);
-        }
-
-        // 非必要资源失败 - 橙色背景
-        &.optional-fail {
-            border-left-color: #fa8c16;
-            background: linear-gradient(135deg, #fff7e6 0%, #ffd591 100%);
-
-            &:hover {
-                background: linear-gradient(135deg, #fff1d6 0%, #ffcc7a 100%);
-            }
         }
     }
 }

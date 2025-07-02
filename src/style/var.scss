@@ -1,0 +1,290 @@
+// 通用变量和混合宏
+$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$primary-gradient-hover: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+$danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+$danger-gradient-hover: linear-gradient(135deg, #ff5252 0%, #e53935 100%);
+$warning-gradient: linear-gradient(135deg, #fa8c16 0%, #ff7a45 100%);
+$success-gradient: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+$info-gradient: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+$background-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+$border-radius-sm: 4px;
+$border-radius: 8px;
+$border-radius-lg: 12px;
+$border-radius-xl: 16px;
+
+$box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+$box-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+$box-shadow-hover: 0 6px 25px rgba(0, 0, 0, 0.12);
+
+$transition: all 0.3s ease;
+
+// 全屏容器基本样式
+@mixin fullscreen-container {
+    min-height: 100vh;
+    height: 100vh;
+    background: $background-gradient;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+// 带滚动的内容区基本样式
+@mixin scrollable-container {
+    overflow-y: auto;
+    max-height: calc(100vh - 48px);
+
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: $border-radius-sm;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $primary-gradient;
+        border-radius: $border-radius-sm;
+
+        &:hover {
+            background: $primary-gradient-hover;
+        }
+    }
+}
+
+// 卡片基本样式
+@mixin card-container {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: $border-radius-lg;
+    box-shadow: $box-shadow-lg;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 24px;
+}
+
+// 悬浮效果
+@mixin hover-lift {
+    transition: $transition;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: $box-shadow-hover;
+    }
+}
+
+// 带左侧边框的标题
+@mixin bordered-title {
+    position: relative;
+    margin: 0;
+    padding-left: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: $primary-gradient;
+        border-radius: 2px;
+    }
+}
+
+// 带图标的标题
+@mixin icon-title {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+
+    &::before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: $primary-gradient;
+        margin-right: 12px;
+        border-radius: 2px;
+    }
+}
+
+// 按钮基本样式
+@mixin button-default {
+    height: 32px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $border-radius;
+    border: 1px solid #d9d9d9;
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.85);
+    background: rgba(255, 255, 255, 0.9);
+    transition: $transition;
+
+    &:hover {
+        border-color: #707070;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+}
+
+// 主要按钮样式
+@mixin button-primary {
+    @include button-default;
+    background: $primary-gradient;
+    border: none;
+    color: white;
+
+    &:hover {
+        background: $primary-gradient-hover;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+}
+
+// 危险按钮样式
+@mixin button-danger {
+    @include button-default;
+    background: $danger-gradient;
+    border: none;
+    color: white;
+
+    &:hover {
+        background: $danger-gradient-hover;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    }
+}
+
+// 极简按钮样式
+@mixin button-plain {
+    @include button-default;
+    background: transparent;
+    border: 1px solid #667eea;
+    color: #667eea;
+
+    &:hover {
+        background: $primary-gradient;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+}
+
+@mixin ant-btn {
+    @include button-default;
+
+    &.ant-btn-primary {
+        @include button-primary;
+    }
+
+    &.ant-btn-background-ghost {
+        @include button-plain;
+    }
+
+    &.ant-btn-dangerous {
+        @include button-danger;
+    }
+
+    &.ant-btn-ghost {
+        @include button-plain;
+    }
+}
+
+// 带背景的表单项
+@mixin form-section {
+    margin-bottom: 32px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: $border-radius;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    @include hover-lift;
+}
+
+// 表单项分组标题
+@mixin section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e8f4fd;
+}
+
+// 输入框基本样式
+@mixin input-style {
+    border-radius: $border-radius !important;
+    border: 1px solid #d9d9d9;
+    padding: 4px 11px;
+    transition: all 0.3s ease;
+
+    &:first-child {
+        margin-left: 0;
+    }
+
+    &:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+
+    &:disabled {
+        background: #f5f5f5;
+        color: #999;
+    }
+}
+
+// 通用列表项样式
+@mixin list-item {
+    margin-bottom: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: $border-radius;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    @include hover-lift;
+
+    &:hover {
+        border-color: #1890ff;
+    }
+}
+
+// 媒体查询
+@mixin respond-to($breakpoint) {
+    @if $breakpoint =="sm" {
+        @media (min-width: 480px) {
+            @content;
+        }
+    }
+
+    @if $breakpoint =="md" {
+        @media (min-width: 768px) {
+            @content;
+        }
+    }
+
+    @if $breakpoint =="lg" {
+        @media (min-width: 1024px) {
+            @content;
+        }
+    }
+
+    @if $breakpoint =="xl" {
+        @media (min-width: 1280px) {
+            @content;
+        }
+    }
+
+    @if $breakpoint =="xxl" {
+        @media (min-width: 1440px) {
+            @content;
+        }
+    }
+}

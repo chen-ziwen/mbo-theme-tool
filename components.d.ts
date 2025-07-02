@@ -18,9 +18,11 @@ declare module 'vue' {
     ASpace: typeof import('ant-design-vue/es')['Space']
     ATabPane: typeof import('ant-design-vue/es')['TabPane']
     ATabs: typeof import('ant-design-vue/es')['Tabs']
-    MainPage: typeof import('./src/components/MainPage.vue')['default']
+    EditableItem: typeof import('./src/components/EditableItem.vue')['default']
+    FileMessage: typeof import('./src/components/FileMessage.vue')['default']
     NavBar: typeof import('./src/components/NavBar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SectionHeader: typeof import('./src/components/SectionHeader.vue')['default']
   }
 }

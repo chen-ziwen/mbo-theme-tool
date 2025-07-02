@@ -13,10 +13,12 @@
         </div>
     </div>
 </template>
+
 <script lang='ts' setup>
-import NavBar from './NavBar.vue';
+import NavBar from '@/components/NavBar.vue';
 
 </script>
+
 <style lang='scss' scoped>
 .home-page {
     width: 100%;
@@ -27,13 +29,11 @@ import NavBar from './NavBar.vue';
 
     .nav-tag {
         flex: 1;
-        height: 100%;
         background-color: rgba(70, 86, 99, 0.8);
     }
 
     .main-page {
         flex: 5;
-        height: 100%;
     }
 }
 </style>

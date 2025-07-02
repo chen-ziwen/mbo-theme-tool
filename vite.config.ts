@@ -22,7 +22,8 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         api: 'modern-compiler',
-        silenceDeprecations: ['legacy-js-api'] // 忽略警告
+        silenceDeprecations: ['legacy-js-api'],
+        additionalData: '@use "@/style" as *;'
       }
     }
   },

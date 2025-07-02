@@ -52,7 +52,7 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
 import { message } from 'ant-design-vue';
-import FileMessage from './FileMessage.vue';
+import FileMessage from '@/components/FileMessage.vue';
 
 const openFolder = window.mt.dialog.openFolder;
 const checkFolderName = window.mt.file.checkFolderName;
@@ -140,7 +140,7 @@ async function useCopyFileResource() {
   display: flex;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: $background-gradient;
   min-height: 100vh;
   padding: 24px;
   gap: 24px;
@@ -148,61 +148,15 @@ async function useCopyFileResource() {
   .file-message-show {
     flex: 3;
     padding: 24px;
-    overflow: auto;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-
-    &::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 4px;
-
-      &:hover {
-        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-      }
-    }
+    @include scrollable-container;
+    @include card-container;
   }
 
   .file-side {
     flex: 2;
-    padding: 24px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;
-    max-height: calc(100vh - 48px);
-    overflow-y: auto;
-
-    &::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 4px;
-
-      &:hover {
-        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-      }
-    }
+    @include card-container;
+    @include scrollable-container;
   }
 
   :deep(.ant-alert) {
@@ -272,7 +226,7 @@ async function useCopyFileResource() {
             display: inline-block;
             width: 3px;
             height: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: $primary-gradient;
             margin-right: 8px;
             border-radius: 2px;
           }
@@ -281,34 +235,18 @@ async function useCopyFileResource() {
 
       .ant-input-group {
         .ant-input {
-          border-radius: 6px;
-          border: 1px solid #d9d9d9;
-          transition: all 0.3s ease;
-
-          &:focus {
-            border-color: #1890ff;
-            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
-          }
+          @include input-style;
         }
       }
     }
   }
 
-  .form-section {
-    margin-bottom: 32px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 12px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+  :deep(.ant-btn) {
+    @include ant-btn;
+  }
 
-    &:hover {
-      background: rgba(255, 255, 255, 0.9);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-    }
+  .form-section {
+    @include form-section;
 
     &.resource-path-section {
       border-left: 4px solid #52c41a;
@@ -324,22 +262,9 @@ async function useCopyFileResource() {
   }
 
   .section-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #2c3e50;
+    @include icon-title;
     margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-
-    &::before {
-      content: '';
-      display: inline-block;
-      width: 4px;
-      height: 16px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      margin-right: 8px;
-      border-radius: 2px;
-    }
+    font-size: 16px;
   }
 
   .input-row {
@@ -347,14 +272,7 @@ async function useCopyFileResource() {
 
     .ant-input {
       width: 100%;
-      border-radius: 6px;
-      border: 1px solid #d9d9d9;
-      transition: all 0.3s ease;
-
-      &:focus {
-        border-color: #1890ff;
-        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
-      }
+      @include input-style;
     }
   }
 
@@ -363,48 +281,6 @@ async function useCopyFileResource() {
     gap: 12px;
     justify-content: flex-end;
     flex-wrap: wrap;
-  }
-
-  :deep(.ant-btn) {
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-
-    &.ant-btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border: none;
-
-      &:hover {
-        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-      }
-    }
-
-    &.ant-btn-primary.ant-btn-background-ghost {
-      background: transparent;
-      border: 2px solid #667eea;
-      color: #667eea;
-
-      &:hover {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-      }
-    }
-
-    &:not(.ant-btn-primary) {
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid #d9d9d9;
-
-      &:hover {
-        border-color: #1890ff;
-        color: #1890ff;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      }
-    }
   }
 }
 </style>

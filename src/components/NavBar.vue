@@ -7,14 +7,12 @@
 </template>
 
 <script lang='ts' setup>
-
 const navLink = [
     { name: "文件处理", path: 'file-reslove' },
     { name: "配置管理", path: 'config-manager' },
     { name: "使用说明", path: 'tips' },
     { name: "应用更新", path: 'update-manager' }
 ];
-
 </script>
 <style lang='scss' scoped>
 .nav {

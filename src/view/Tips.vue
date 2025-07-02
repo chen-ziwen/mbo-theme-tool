@@ -15,36 +15,19 @@
         <dd>6. 完成上面所有步骤后，点击复制，即可将资源图片，复制到开发项目的对应图片路径下！</dd>
     </dl>
 </template>
-<script lang='ts' setup>
 
-</script>
+<script lang='ts' setup></script>
+
 <style lang='scss' scoped>
 dl {
     min-height: 100vh;
     max-height: 100vh;
     padding: 24px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: $background-gradient;
     letter-spacing: 1px;
     margin: 0;
-    overflow-y: auto;
-
-    &::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.1);
-        border-radius: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 4px;
-
-        &:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-        }
-    }
+    counter-reset: step-counter; // 初始化计数器
+    @include scrollable-container;
 
     dt {
         margin-bottom: 24px;
@@ -55,12 +38,8 @@ dl {
             font-weight: 700;
             margin: 0;
             padding: 20px 24px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
             position: relative;
+            @include card-container;
 
             &::before {
                 content: '';
@@ -69,7 +48,7 @@ dl {
                 top: 0;
                 bottom: 0;
                 width: 4px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: $primary-gradient;
                 border-radius: 4px 0 0 4px;
             }
         }
@@ -78,21 +57,12 @@ dl {
     dd {
         margin: 0 0 16px 0;
         padding: 20px 24px;
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        @include card-container;
         line-height: 1.6;
         color: #2c3e50;
         font-size: 14px;
-        transition: all 0.3s ease;
         position: relative;
-
-        &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
-        }
+        @include hover-lift;
 
         &:nth-child(even) {
             border-left: 4px solid #52c41a;
@@ -111,7 +81,7 @@ dl {
             top: -8px;
             width: 24px;
             height: 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: $primary-gradient;
             color: white;
             border-radius: 50%;
             display: flex;
@@ -122,10 +92,5 @@ dl {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
     }
-}
-
-// 初始化计数器
-dl {
-    counter-reset: step-counter;
 }
 </style>
