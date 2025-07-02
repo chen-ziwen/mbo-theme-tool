@@ -80,7 +80,7 @@ async function useOpenFolder(text: string, callback: (path: string) => void) {
   if (info.status) {
     callback(info.path);
   } else {
-    message.error(text);;
+    message.error(text);
   }
 }
 

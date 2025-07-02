@@ -43,8 +43,8 @@
 
       <!-- 操作按钮 -->
       <div class="update-actions">
-        <button class="action-btn primary" :class="{ loading: checking, disabled: downloading }" @click="checkForUpdates"
-          :disabled="downloading">
+        <button class="action-btn primary" :class="{ loading: checking, disabled: downloading }"
+          @click="checkForUpdates" :disabled="downloading">
           <svg v-if="checking" class="btn-icon spin" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
           </svg>
@@ -66,8 +66,6 @@
           {{ downloading ? '下载中...' : '下载并安装' }}
         </button>
       </div>
-
-
 
       <!-- 消息提示区域 -->
       <div class="message-container">
@@ -119,67 +117,67 @@ const messageType = ref('info');
 // 获取当前版本
 const getCurrentVersion = async () => {
   try {
-    currentVersion.value = await window.mt.update.getAppVersion()
+    currentVersion.value = await window.mt.update.getAppVersion();
   } catch (error) {
-    console.error('获取版本信息失败:', error)
+    console.error('获取版本信息失败:', error);
   }
 }
 
 const checkForUpdates = async () => {
-  checking.value = true
-  message.value = ''
+  checking.value = true;
+  message.value = '';
 
   try {
-    const result = await window.mt.update.checkForUpdates()
+    const result = await window.mt.update.checkForUpdates();
 
     if (result && result.updateAvailable) {
-      updateInfo.value = result
-      updateAvailable.value = true
-      message.value = `发现新版本 ${result.version}，可以更新！`
-      messageType.value = 'success'
+      updateInfo.value = result;
+      updateAvailable.value = true;
+      message.value = `发现新版本 ${result.version}，可以更新！`;
+      messageType.value = 'success';
     } else {
-      updateAvailable.value = false
-      message.value = '当前已是最新版本'
-      messageType.value = 'info'
+      updateAvailable.value = false;
+      message.value = '当前已是最新版本';
+      messageType.value = 'info';
     }
   } catch (error) {
-    console.error('检查更新失败:', error)
+    console.error('检查更新失败:', error);
     if (error instanceof Error) {
-      message.value = `检查更新失败: ${error.message}`
+      message.value = `检查更新失败: ${error.message}`;
     } else {
-      message.value = '检查更新失败，请稍后重试'
+      message.value = '检查更新失败，请稍后重试';
     }
-    messageType.value = 'error'
+    messageType.value = 'error';
   } finally {
-    checking.value = false
+    checking.value = false;
   }
 }
 
 // 下载并安装更新
 const downloadAndInstall = async () => {
-  downloading.value = true
-  message.value = '正在下载更新...'
-  messageType.value = 'info'
+  downloading.value = true;
+  message.value = '正在下载更新...';
+  messageType.value = 'info';
 
   try {
-    await window.mt.update.downloadUpdate()
-    message.value = '下载完成，应用将重启并安装更新'
-    messageType.value = 'success'
+    await window.mt.update.downloadUpdate();
+    message.value = '下载完成，应用将重启并安装更新';
+    messageType.value = 'success';
 
     setTimeout(() => {
-      window.mt.update.quitAndInstall()
-    }, 1000)
+      window.mt.update.quitAndInstall();
+    }, 1000);
   } catch (error: any) {
-    message.value = error?.message || '下载更新失败，请稍后重试'
-    messageType.value = 'error'
+    message.value = error?.message || '下载更新失败，请稍后重试';
+    messageType.value = 'error';
   } finally {
-    downloading.value = false
+    downloading.value = false;
   }
 }
 
 onMounted(() => {
-  getCurrentVersion()
-})
+  getCurrentVersion();
+});
 </script>
 
 <style lang="scss" scoped>
