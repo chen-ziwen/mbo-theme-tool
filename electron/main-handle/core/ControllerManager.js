@@ -12,8 +12,6 @@ class ControllerManager {
     this.controllerStates = new Map();
     this.controllerDir = path.join(__dirname, "../controllers");
     this.initialized = false;
-    this.hotReloadEnabled = false;
-    this.watchedFiles = new Set();
   }
 
   /**
@@ -26,7 +24,6 @@ class ControllerManager {
         (file) => file.endsWith("Controller.js") && !file.startsWith("Base")
       );
 
-      // logger.info(`发现控制器文件: ${controllerFiles.join(", ")}`);
       return controllerFiles;
     } catch (error) {
       logger.error("发现控制器失败:", error);
@@ -43,11 +40,6 @@ class ControllerManager {
     const controllerName = path.basename(filename, ".js");
 
     try {
-      // 清除模块缓存以支持热重载
-      if (require.cache[controllerPath]) {
-        delete require.cache[controllerPath];
-      }
-
       const ControllerClass = require(controllerPath);
 
       if (typeof ControllerClass !== "function") {
@@ -62,8 +54,6 @@ class ControllerManager {
 
       this.controllers.set(controllerName, controller);
       this.controllerStates.set(controllerName, "loaded");
-
-      // logger.info(`控制器加载成功: ${controllerName}`);
 
       return controller;
     } catch (error) {
@@ -81,7 +71,6 @@ class ControllerManager {
     try {
       if (typeof controller.register === "function") {
         await controller.register();
-        // logger.info(`控制器路由注册成功: ${controller.name}`);
       } else {
         logger.warn(`控制器 ${controller.name} 没有 register 方法`);
       }
@@ -132,20 +121,6 @@ class ControllerManager {
    */
   setControllerDir(dir) {
     this.controllerDir = path.resolve(dir);
-    // logger.info(`设置控制器目录: ${this.controllerDir}`);
-  }
-
-  /**
-   * 启用热重载
-   */
-  enableHotReload() {
-    if (process.env.NODE_ENV !== "development") {
-      logger.warn("热重载仅在开发环境下可用");
-      return;
-    }
-
-    this.hotReloadEnabled = true;
-    logger.info("热重载已启用");
   }
 
   /**
@@ -153,10 +128,6 @@ class ControllerManager {
    * @param {string} controllerName 控制器名称
    */
   async reloadController(controllerName) {
-    if (!this.hotReloadEnabled) {
-      throw new Error("热重载未启用");
-    }
-
     try {
       // 销毁现有控制器
       if (this.controllers.has(controllerName)) {
@@ -168,7 +139,6 @@ class ControllerManager {
       const controller = await this.loadController(filename);
       await this.registerController(controller);
 
-      logger.info(`控制器重新加载成功: ${controllerName}`);
       return controller;
     } catch (error) {
       logger.error(`重新加载控制器失败: ${controllerName}`, error);
@@ -193,8 +163,6 @@ class ControllerManager {
 
       this.controllers.delete(controllerName);
       this.controllerStates.delete(controllerName);
-
-      logger.info(`控制器销毁成功: ${controllerName}`);
     } catch (error) {
       logger.error(`销毁控制器失败: ${controllerName}`, error);
     }
@@ -257,15 +225,8 @@ class ControllerManager {
    * 重启所有控制器
    */
   async restart() {
-    logger.info("重启所有控制器...");
-
-    // 销毁所有控制器
     await this.destroy();
-
-    // 重新启动
     await this.start();
-
-    logger.info("所有控制器重启完成");
   }
 
   /**
@@ -273,8 +234,6 @@ class ControllerManager {
    */
   async destroy() {
     try {
-      logger.info("开始销毁控制器管理器...");
-
       // 销毁所有控制器
       const destroyPromises = [];
       for (const controllerName of this.controllers.keys()) {
@@ -286,18 +245,11 @@ class ControllerManager {
       // 清理状态
       this.controllers.clear();
       this.controllerStates.clear();
-      this.watchedFiles.clear();
       this.initialized = false;
-      this.hotReloadEnabled = false;
-
-      logger.info("控制器管理器销毁完成");
     } catch (error) {
       logger.error("销毁控制器管理器时出错:", error);
     }
   }
 }
 
-// 创建单例实例
-const controllerManager = new ControllerManager();
-
-module.exports = controllerManager;
+module.exports = new ControllerManager();

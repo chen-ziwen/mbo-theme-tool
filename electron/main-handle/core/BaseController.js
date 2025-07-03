@@ -98,7 +98,6 @@ class BaseController {
       }
 
       this.initialized = true;
-      // logger.info(`控制器 ${this.name} 初始化完成`);
     } catch (error) {
       logger.error(`控制器 ${this.name} 初始化失败:`, error);
       throw error;
@@ -130,12 +129,7 @@ class BaseController {
       // 注册所有路由到IPC管理器
       for (const [channel, route] of this.routes) {
         ipcManager.handle(channel, route.handler, route.options);
-        // logger.info(`注册路由: ${channel} -> ${this.name}.${route.method}`);
       }
-
-      // logger.info(
-      //   `控制器 ${this.name} 注册完成，共 ${this.routes.size} 个路由`
-      // );
     } catch (error) {
       logger.error(`控制器 ${this.name} 注册失败:`, error);
       throw error;
@@ -194,8 +188,6 @@ class BaseController {
       this.middlewares = [];
       this.destroyed = true;
       this.initialized = false;
-
-      logger.info(`控制器 ${this.name} 销毁完成`);
     } catch (error) {
       logger.error(`控制器 ${this.name} 销毁失败:`, error);
     }
@@ -205,11 +197,9 @@ class BaseController {
    * 重启控制器
    */
   async restart() {
-    logger.info(`重启控制器: ${this.name}`);
     await this.destroy();
     await this.init();
     await this.register();
-    logger.info(`控制器 ${this.name} 重启完成`);
   }
 
   /**

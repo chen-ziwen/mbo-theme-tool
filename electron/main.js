@@ -31,7 +31,6 @@ const createWindow = () => {
     win.loadFile(path.join(__dirname, "../dist/index.html"));
   }
 
-  // 注册主进程事件处理函数并初始化
   registerHandler();
 };
 

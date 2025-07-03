@@ -41,7 +41,6 @@ class IPCManager {
 
     const wrappedHandler = this.wrapHandler(handler, channel, options);
     this.handlers.set(channel, { handler: wrappedHandler, options });
-
     ipcMain.handle(channel, wrappedHandler);
   }
 
@@ -65,7 +64,7 @@ class IPCManager {
       const context = {
         event,
         channel,
-        args: [...args], // 创建副本，允许中间件修改
+        args, // 渲染进程传过来的参数
         options,
         startTime,
         data: {}, // 共享数据对象，中间件可以在此存储数据
@@ -76,7 +75,7 @@ class IPCManager {
         await this.executeMiddlewares(context);
 
         // 执行处理器，使用中间件可能修改过的参数
-        const result = await handler(event, ...context.args);
+        const result = await handler(context.event, ...context.args);
 
         const duration = Date.now() - startTime;
         this.updateStats(true, duration);
