@@ -7,21 +7,24 @@ const { getIconPath } = require("./utils");
 process.env.ELECTRON_UPDATER_ALLOW_UNVERIFIED = "true";
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
 
+const isDev = process.env.NODE_ENV === "development" || !app.isPackaged;
+
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 1024,
     height: 768,
     icon: getIconPath(),
-    autoHideMenuBar: true,
     resizable: false,
+    autoHideMenuBar: true,
     webPreferences: {
+      devTools: isDev,
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
       webSecurity: false,
     },
   });
 
-  if (process.env.NODE_ENV === "development") {
+  if (isDev) {
     const url = "http://localhost:5210/";
     win.loadURL(url);
   } else {

@@ -193,10 +193,6 @@ $transition: all 0.3s ease;
     &.ant-btn-dangerous {
         @include button-danger;
     }
-
-    &.ant-btn-ghost {
-        @include button-plain;
-    }
 }
 
 // 带背景的表单项
